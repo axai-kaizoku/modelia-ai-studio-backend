@@ -1,6 +1,6 @@
 import express from 'express';
 import authRoute from './auth.route';
-import userRoute from './user.route';
+import generateRoute from './generate.route';
 
 const router = express.Router();
 
@@ -10,8 +10,8 @@ const defaultRoutes = [
     route: authRoute,
   },
   {
-    path: '/user',
-    route: userRoute,
+    path: '/generate',
+    route: generateRoute,
   },
 ];
 
