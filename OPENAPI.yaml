@@ -1,0 +1,426 @@
+openapi: 3.0.3
+info:
+  title: Modelia AI Studio Backend API
+  description: |
+    A robust Node.js/Express backend API for AI image generation with authentication, 
+    user management, and PostgreSQL database.
+    
+    ## Features
+    - JWT-based authentication
+    - Role-based access control
+    - AI image generation with prompt and style support
+    - Base64 image upload support (up to 10MB)
+    - Comprehensive input validation
+    
+    ## Authentication
+    Most endpoints require a Bearer token in the Authorization header:
+    ```
+    Authorization: Bearer <access_token>
+    ```
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@modelia.com
+  license:
+    name: ISC
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.modelia.com # [not configured yet]
+    description: Production server
+
+tags:
+  - name: Auth
+    description: Authentication and authorization endpoints
+  - name: Users
+    description: User management endpoints
+  - name: Generations
+    description: AI image generation endpoints
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        role:
+          type: string
+          enum: [user, admin]
+          example: "user"
+        isEmailVerified:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires:
+          type: string
+          format: date-time
+
+    AuthTokens:
+      type: object
+      properties:
+        access:
+          $ref: '#/components/schemas/Token'
+        refresh:
+          $ref: '#/components/schemas/Token'
+
+    Generation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        userId:
+          type: string
+          format: uuid
+        prompt:
+          type: string
+          example: "A beautiful sunset over mountains"
+        style:
+          type: string
+          example: "realistic"
+        originalImage:
+          type: string
+          nullable: true
+          description: "Base64 encoded image data"
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB..."
+        imageUrl:
+          type: string
+          format: uri
+          example: "https://picsum.photos/seed/1234567890/800/600"
+        status:
+          type: string
+          enum: [pending, completed, failed]
+          example: "completed"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation error"
+        stack:
+          type: string
+          description: "Only available in development mode"
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          minLength: 1
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          minLength: 8
+          pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]"
+          example: "Password123!"
+          description: "Must contain at least 8 characters, one uppercase, one lowercase, one number and one special character"
+        role:
+          type: string
+          enum: [user, admin]
+          example: "user"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          example: "Password123!"
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          $ref: '#/components/schemas/AuthTokens'
+
+    CreateGenerationRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          example: "A beautiful sunset over mountains with vibrant colors"
+        style:
+          type: string
+          maxLength: 100
+          example: "realistic"
+        imageUpload:
+          type: string
+          pattern: "^data:image\\/(png|jpeg|jpg|gif|webp);base64,"
+          description: "Base64 encoded image with data URI prefix"
+          example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB..."
+
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          example: "Jane Doe"
+        email:
+          type: string
+          format: email
+          example: "jane@example.com"
+        password:
+          type: string
+          minLength: 8
+          example: "NewPassword123!"
+
+paths:
+  /v1/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Create a new user account
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - validation error or email already taken
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                emailTaken:
+                  value:
+                    code: 400
+                    message: "Email is already taken"
+                validationError:
+                  value:
+                    code: 400
+                    message: "Validation error"
+
+  /v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      description: Authenticate user and receive access tokens
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Incorrect email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 401
+                message: "Incorrect email or password"
+
+  /v1/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout user
+      description: Invalidate refresh token
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "User logout successfully!"
+        '401':
+          description: Logout failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /v1/generate:
+    post:
+      tags:
+        - Generations
+      summary: Create image generation
+      description: |
+        Generate an AI image based on prompt and optional style.
+        
+        **Features:**
+        - Accepts base64 image upload (up to 10MB)
+        - Simulates 1-2 second processing delay
+        - 20% chance of model overload error
+        - Returns generated image URL on success
+      operationId: createGeneration
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGenerationRequest'
+      responses:
+        '201':
+          description: Generation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                promptTooShort:
+                  value:
+                    code: 400
+                    message: "Prompt must be at least 10 characters"
+                invalidImage:
+                  value:
+                    code: 400
+                    message: "Image must be a valid base64 data URL (data:image/png;base64,...)"
+        '401':
+          description: Unauthorized - authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Service unavailable - model overloaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 503
+                message: "Model overloaded"
+
+    get:
+      tags:
+        - Generations
+      summary: Get user generations
+      description: Retrieve the authenticated user's image generations
+      operationId: getGenerations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Number of generations to return
+          schema:
+            type: string
+            default: "5"
+      responses:
+        '200':
+          description: List of generations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Generation'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
