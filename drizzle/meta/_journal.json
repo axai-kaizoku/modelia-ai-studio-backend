@@ -8,6 +8,13 @@
       "when": 1751185182696,
       "tag": "0000_careful_network",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762677330172,
+      "tag": "0001_woozy_redwing",
+      "breakpoints": true
     }
   ]
 }

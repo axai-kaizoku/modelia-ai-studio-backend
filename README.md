@@ -4,9 +4,11 @@
 
 ## TODO
 
-[ ] - auth 
-[ ] - signup/signin save user to db
-[ ] - middleware
-[ ] - routes
-[ ] - generate image
-[ ] - save response
+[x] - auth 
+[x] - signup/signin save user to db
+[x] - middleware
+[x] - routes
+[x] - generate image
+[x] - save response
+[ ] - add test cases
+

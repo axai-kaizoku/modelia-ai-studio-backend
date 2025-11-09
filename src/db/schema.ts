@@ -13,6 +13,8 @@ export const tokenTypeEnum = pgEnum('token_type', [
   tokenTypes.VERIFY_EMAIL,
 ]);
 
+export const generationStatusEnum = pgEnum('generation_status', ['pending', 'completed', 'failed']);
+
 // ===== Tables =====
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -42,14 +44,38 @@ export const tokens = pgTable('tokens', {
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
 });
 
+export const generations = pgTable('generations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .references(() => users.id, { onDelete: 'cascade' })
+    .notNull(),
+  prompt: varchar('prompt', { length: 1000 }).notNull(),
+  style: varchar('style', { length: 100 }),
+  imageUrl: varchar('image_url', { length: 500 }),
+  status: generationStatusEnum('status').default('pending').notNull(),
+  createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull()
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+});
+
 // ===== Relations =====
 export const userRelations = relations(users, ({ many }) => ({
   tokens: many(tokens),
+  generations: many(generations),
 }));
 
 export const tokenRelations = relations(tokens, ({ one }) => ({
   user: one(users, {
     fields: [tokens.userId],
+    references: [users.id],
+  }),
+}));
+
+export const generationRelations = relations(generations, ({ one }) => ({
+  user: one(users, {
+    fields: [generations.userId],
     references: [users.id],
   }),
 }));
