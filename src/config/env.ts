@@ -10,7 +10,7 @@ const envVarsSchema = z.object({
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
-  JWT_ACCESS_EXPIRATION_MINUTES: z.coerce.number().default(30),
+  JWT_ACCESS_EXPIRATION_DAYS: z.coerce.number().default(30),
   JWT_REFRESH_EXPIRATION_DAYS: z.coerce.number().default(30),
   JWT_RESET_PASSWORD_EXPIRATION_MINUTES: z.coerce.number().default(10),
   JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: z.coerce.number().default(10),
@@ -47,7 +47,7 @@ export const env = {
   },
   jwt: {
     secret: envVars.JWT_SECRET,
-    accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
+    accessExpirationDays: envVars.JWT_ACCESS_EXPIRATION_DAYS,
     refreshExpirationDays: envVars.JWT_REFRESH_EXPIRATION_DAYS,
     resetPasswordExpirationMinutes: envVars.JWT_RESET_PASSWORD_EXPIRATION_MINUTES,
     verifyEmailExpirationMinutes: envVars.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,

@@ -1,7 +1,7 @@
 import { rolesAllowed } from '@/config';
 import { tokenTypes } from '@/config/tokens';
 import { relations, sql } from 'drizzle-orm';
-import { boolean, pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { boolean, pgEnum, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
 // ===== Enums =====
 export const roleEnum = pgEnum('role', rolesAllowed);
@@ -51,6 +51,7 @@ export const generations = pgTable('generations', {
     .notNull(),
   prompt: varchar('prompt', { length: 1000 }).notNull(),
   style: varchar('style', { length: 100 }),
+  originalImage: text('original_image'),
   imageUrl: varchar('image_url', { length: 500 }),
   status: generationStatusEnum('status').default('pending').notNull(),
   createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),

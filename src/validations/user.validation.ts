@@ -11,17 +11,6 @@ const createUser = {
   }),
 };
 
-const getUsers = {
-  query: z.object({
-    name: z.string().optional(),
-    role: z.string().optional(),
-    sortBy: z.string().optional(),
-    limit: z.string().optional(),
-    order: z.string().optional(),
-    page: z.string().optional(),
-  }),
-};
-
 const getUser = {
   params: z.object({
     userId: z.string().uuid(),
@@ -51,7 +40,6 @@ const deleteUser = {
 
 export default {
   createUser,
-  getUsers,
   getUser,
   updateUser,
   deleteUser,

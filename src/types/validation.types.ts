@@ -10,7 +10,6 @@ type ResetPasswordQuery = z.infer<typeof authValidation.resetPassword.query>;
 type ResetPasswordBody = z.infer<typeof authValidation.resetPassword.body>;
 type VerifyEmailQuery = z.infer<typeof authValidation.verifyEmail.query>;
 type CreateUserBody = z.infer<typeof userValidation.createUser.body>;
-type GetUsersQuery = z.infer<typeof userValidation.getUsers.query>;
 type GetUserParams = z.infer<typeof userValidation.getUser.params>;
 type UpdateUserParams = z.infer<typeof userValidation.updateUser.params>;
 type UpdateUserBody = z.infer<typeof userValidation.updateUser.body>;
@@ -26,7 +25,6 @@ export type {
   ResetPasswordBody,
   VerifyEmailQuery,
   CreateUserBody,
-  GetUsersQuery,
   GetUserParams,
   UpdateUserParams,
   UpdateUserBody,

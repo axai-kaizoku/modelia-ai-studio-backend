@@ -22,11 +22,11 @@ if (env.mode !== 'test') {
 // set security HTTP headers
 app.use(helmet());
 
-// parse json request body
-app.use(express.json());
+// parse json request body with 10MB limit for image uploads
+app.use(express.json({ limit: '10mb' }));
 
-// parse urlencoded request body
-app.use(express.urlencoded({ extended: true }));
+// parse urlencoded request body with 10MB limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // sanitize request data
 app.use(mongoSanitize());

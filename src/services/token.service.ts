@@ -66,7 +66,7 @@ export const verifyToken = async (token: string, type: string) => {
 };
 
 const generateAuthTokens = async (user: SafeUser) => {
-  const accessTokenExpires = moment().add(env.jwt.accessExpirationMinutes, 'minutes');
+  const accessTokenExpires = moment().add(env.jwt.accessExpirationDays, 'days');
   const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS);
 
   const refreshTokenExpires = moment().add(env.jwt.refreshExpirationDays, 'days');

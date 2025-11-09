@@ -19,6 +19,7 @@ const createGeneration = async (userId: string, payload: { prompt: string; style
     .insert(generations)
     .values({
       userId,
+      originalImage: payload.imageUpload,
       prompt: payload.prompt,
       style: payload.style,
       imageUrl: `https://picsum.photos/seed/${Date.now()}/800/600`,
