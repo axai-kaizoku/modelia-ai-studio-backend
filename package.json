@@ -1,5 +1,5 @@
 {
-  "name": "node-express-starter",
+  "name": "modelia-ai-studio-backend",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -85,6 +85,5 @@
     ],
     "splitting": false,
     "clean": true
-  },
-  "packageManager": "pnpm@10.2.0"
+  }
 }

@@ -8,11 +8,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = z.object({
   NODE_ENV: z.enum(['production', 'development', 'test']).optional(), // To skipt while using drizzle commands
   PORT: z.coerce.number().default(3000),
-  DATABASE_USER: z.string(),
-  DATABASE_PASSWORD: z.string(),
-  DATABASE_NAME: z.string(),
-  DATABASE_HOST: z.string(),
-  DATABASE_PORT: z.coerce.number().default(5432),
+  DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_ACCESS_EXPIRATION_MINUTES: z.coerce.number().default(30),
   JWT_REFRESH_EXPIRATION_DAYS: z.coerce.number().default(30),
@@ -40,8 +36,8 @@ if (!result.success) {
 }
 
 const envVars = result.data;
-const { DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME } = envVars;
-const databaseUrl = `postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}`;
+const { DATABASE_URL } = envVars;
+const databaseUrl = DATABASE_URL;
 
 export const env = {
   mode: envVars.NODE_ENV,
