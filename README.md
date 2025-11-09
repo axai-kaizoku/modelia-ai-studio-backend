@@ -10,5 +10,5 @@
 [x] - routes
 [x] - generate image
 [x] - save response
-[ ] - add test cases
+[x] - add test cases
 
